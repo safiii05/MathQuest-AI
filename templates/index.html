@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathQuest AI — Grade 5 & 6 Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { 
+                extend: { 
+                    colors: { 
+                        primary: '#1E3A8A',      /* Dark Thick Blue (Deep Blue) */
+                        secondary: '#3B82F6',    /* Bright Blue Accent */
+                        accent: '#F59E0B',       /* Gold / Sunny Yellow */
+                        darkbg: '#0F172A',       /* Dark Background */
+                        cardbg: '#FFFFFF',       /* Pure White Cards */
+                        mutedtext: '#475569'     /* Deep Slate */
+                    } 
+                } 
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #0F172A; 
+            /* Highly visible, unique math formulas and blueprint pattern background */
+            background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.88), rgba(30, 58, 138, 0.92)), url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+            color: #E2E8F0; 
+        }
+        .clean-card { background: #FFFFFF; border: 1px solid #CBD5E1; box-shadow: 0 15px 35px -5px rgba(30, 58, 138, 0.2); color: #1E293B; }
+        .sidebar-btn.active { background: #1E3A8A; border-left: 4px solid #3B82F6; color: #FFFFFF; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+    <header class="bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 px-8 py-4 flex items-center justify-between border-b border-blue-900/60 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg border border-blue-400/30">MQ</div>
+            <div>
+                <h1 class="font-extrabold text-lg text-white tracking-tight">MathQuest <span class="text-blue-400">AI</span></h1>
+                <p class="text-xs font-semibold text-slate-400">Georgia Math Standards (Grades 5-6)</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-6">
+            <div class="hidden sm:flex items-center bg-slate-800 rounded-full p-1 border border-slate-700">
+                <button onclick="setGrade('Grade 5')" id="g5-btn" class="px-4 py-1.5 text-xs font-bold rounded-full bg-blue-600 text-white shadow-md transition-all">Grade 5</button>
+                <button onclick="setGrade('Grade 6')" id="g6-btn" class="px-4 py-1.5 text-xs font-bold rounded-full text-slate-400 hover:text-white transition-all">Grade 6</button>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full shadow-sm">
+                    <i data-lucide="zap" class="w-4 h-4 text-amber-400 mr-1.5 fill-amber-400"></i>
+                    <span id="xp-counter" class="font-extrabold text-sm text-amber-300">{{ user.xp }} XP</span>
+                </div>
+                <a href="/logout" title="Logout" class="p-2.5 rounded-xl bg-slate-800 hover:bg-rose-950 hover:text-rose-400 text-slate-300 transition-all border border-slate-700"><i data-lucide="log-out" class="w-4 h-4"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 relative z-10">
+        <aside class="w-72 bg-slate-900/80 backdrop-blur-md border-r border-blue-900/60 p-6 hidden lg:flex flex-col justify-between shadow-xl">
+            <nav class="space-y-2">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-btn active w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl font-bold text-sm bg-blue-900/50 text-white"><i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>Dashboard</span></button>
+                <button onclick="switchTab('explorer')" id="nav-explorer" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-300 hover:bg-slate-800 hover:text-white"><i data-lucide="compass" class="w-5 h-5 text-slate-400"></i><span>Topic Explorer</span></button>
+                <button onclick="switchTab('tutor')" id="nav-tutor" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-300 hover:bg-slate-800 hover:text-white"><i data-lucide="bot" class="w-5 h-5 text-slate-400"></i><span>AI Tutor & Video</span></button>
+                <button onclick="switchTab('solver')" id="nav-solver" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-300 hover:bg-slate-800 hover:text-white"><i data-lucide="calculator" class="w-5 h-5 text-slate-400"></i><span>AI Formula & Solver</span></button>
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-300 hover:bg-slate-800 hover:text-white"><i data-lucide="brain-circuit" class="w-5 h-5 text-slate-400"></i><span>Smart Quiz Arena</span></button>
+                <button onclick="switchTab('achievements')" id="nav-achievements" class="sidebar-btn w-full flex items-center space-x-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-slate-300 hover:bg-slate-800 hover:text-white"><i data-lucide="award" class="w-5 h-5 text-slate-400"></i><span>Achievements</span></button>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto space-y-8">
+            <section id="view-dashboard" class="space-y-8 view-section">
+                <div class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-3xl p-8 text-white shadow-2xl border border-blue-700/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="space-y-3 max-w-xl">
+                        <span class="bg-blue-500/20 border border-blue-400/40 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-blue-200">Welcome, {{ user.name }}</span>
+                        <h2 id="dash-title" class="text-3xl font-extrabold text-white">Grade 5 Georgia Mathematics Curriculum</h2>
+                        <p id="dash-desc" class="text-blue-100 text-sm leading-relaxed">Focusing on fractions with unlike denominators, decimal place value to thousandths, and coordinate geometry.</p>
+                    </div>
+                    <button onclick="switchTab('explorer')" class="bg-white text-blue-950 font-extrabold px-7 py-3.5 rounded-2xl shadow-lg hover:bg-blue-50 transition-all flex items-center space-x-2">
+                        <span>Explore Curriculum</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="clean-card p-6 rounded-3xl flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-900"><i data-lucide="book-open" class="w-7 h-7"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase">Active Curriculum</p>
+                            <h3 id="stat-grade" class="text-xl font-extrabold text-slate-900 mt-0.5">Grade 5</h3>
+                        </div>
+                    </div>
+                    <div class="clean-card p-6 rounded-3xl flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-900"><i data-lucide="target" class="w-7 h-7"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase">Mastery Target</p>
+                            <h3 id="stat-target" class="text-xl font-extrabold text-slate-900 mt-0.5">Fractions & Decimals</h3>
+                        </div>
+                    </div>
+                    <div class="clean-card p-6 rounded-3xl flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700"><i data-lucide="zap" class="w-7 h-7"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase">Total XP</p>
+                            <h3 class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ user.xp }} XP</h3>
+                        </div>
+                    </div>
+                    <div class="clean-card p-6 rounded-3xl flex items-center space-x-4">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-700"><i data-lucide="award" class="w-7 h-7"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-500 uppercase">Learning Streak</p>
+                            <h3 class="text-2xl font-extrabold text-slate-900 mt-0.5">{{ user.streak }} Days</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-explorer" class="space-y-8 view-section hidden">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Topic Explorer (<span id="active-grade-label">Grade 5</span>)</h2>
+                    <p class="text-sm text-slate-300">Click any topic card to load AI lessons and generated infographics.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="topic-grid"></div>
+            </section>
+
+            <section id="view-tutor" class="space-y-6 view-section hidden">
+                <div class="clean-card p-8 rounded-3xl space-y-6">
+                    <div class="flex justify-between items-center pb-6 border-b border-slate-200">
+                        <div>
+                            <span class="bg-blue-100 text-blue-900 font-bold px-3 py-1 rounded-full text-xs">AI Tutor & Video Narration</span>
+                            <h2 id="tutor-heading" class="text-2xl font-extrabold text-slate-900 mt-2">Fractions Guide</h2>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <select id="tutor-topic-select" onchange="fetchAiTutor()" class="bg-slate-100 border border-slate-300 rounded-2xl px-4 py-2.5 font-bold text-sm text-slate-800"></select>
+                            <button onclick="fetchAiTutor()" class="bg-blue-900 text-white font-extrabold px-6 py-2.5 rounded-2xl shadow-lg hover:bg-blue-800">Regenerate</button>
+                        </div>
+                    </div>
+                    <div id="infographic-container" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center"></div>
+                    <div id="tutor-content" class="space-y-6"></div>
+                </div>
+            </section>
+
+            <section id="view-solver" class="space-y-6 view-section hidden">
+                <div class="clean-card p-8 rounded-3xl space-y-6 max-w-3xl mx-auto">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-900">AI Formula & Math Solver</h2>
+                        <p class="text-xs text-slate-500 mt-1">Type any math problem to get instant AI step-by-step solutions.</p>
+                    </div>
+                    <textarea id="solver-query" rows="3" placeholder="e.g., How do I simplify 16/24?" class="w-full p-4 rounded-2xl border border-slate-300 text-sm bg-slate-50 text-slate-900"></textarea>
+                    <button onclick="solveMathQuery()" class="w-full py-3.5 bg-blue-900 text-white font-extrabold text-sm rounded-xl shadow-lg hover:bg-blue-800">Solve with AI</button>
+                    <div id="solver-result-container" class="hidden p-6 bg-blue-50 rounded-2xl border border-blue-200 space-y-3">
+                        <h4 class="font-extrabold text-blue-950 text-sm">Step-by-Step Solution:</h4>
+                        <p id="solver-output" class="text-slate-800 text-sm leading-relaxed whitespace-pre-line"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-quiz" class="space-y-6 view-section hidden">
+                <div class="clean-card p-8 rounded-3xl max-w-3xl mx-auto space-y-6">
+                    <div class="flex justify-between items-center pb-4 border-b border-slate-200">
+                        <div>
+                            <span id="quiz-diff-tag" class="bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full text-xs uppercase">Difficulty: Medium</span>
+                            <h2 class="text-2xl font-extrabold text-slate-900 mt-2">Smart Quiz Arena</h2>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <select id="quiz-topic-select" class="bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 font-bold text-xs text-slate-800"></select>
+                            <button onclick="startQuizSession()" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md hover:bg-blue-700">Start Quiz</button>
+                        </div>
+                    </div>
+                    <div id="quiz-container" class="space-y-6">
+                        <div class="text-center py-12">
+                            <h3 class="text-xl font-bold text-slate-800">Ready for adaptive practice tests?</h3>
+                            <p class="text-slate-500 text-sm mt-1 mb-6">Select your topic and test your mastery with 10+ questions!</p>
+                            <button onclick="startQuizSession()" class="bg-blue-900 text-white font-extrabold px-8 py-3 rounded-2xl shadow-lg hover:bg-blue-800">Start Quiz Session</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-achievements" class="space-y-6 view-section hidden">
+                <h2 class="text-2xl font-extrabold text-white">Badges & Achievements</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="achievements-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let currentGrade = 'Grade 5';
+        let quizQuestions = [];
+        let currentQuestionIdx = 0;
+        let correctCount = 0;
+
+        const gradeCurriculum = {
+            "Grade 5": [
+                { title: "Fractions", desc: "Unlike denominators, addition, and simplification.", icon: "pie-chart" },
+                { title: "Decimals", desc: "Compare and compute decimals to thousandths.", icon: "hash" },
+                { title: "Geometry", desc: "Coordinate plane plotting and polygon classification.", icon: "box" }
+            ],
+            "Grade 6": [
+                { title: "Fractions", desc: "Fraction division and complex word problems.", icon: "divide" },
+                { title: "Ratios", desc: "Ratio concepts, tape diagrams, and unit rates.", icon: "scale" },
+                { title: "Expressions", desc: "Evaluate algebraic variables and equations.", icon: "cpu" }
+            ]
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active', 'bg-blue-900/50', 'text-white'));
+            document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.add('text-slate-300'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.add('active', 'bg-blue-900/50', 'text-white');
+            activeBtn.classList.remove('text-slate-300');
+            if (tabId === 'explorer') renderExplorer();
+            if (tabId === 'achievements') loadAchievements();
+            lucide.createIcons();
+        }
+
+        function setGrade(grade) {
+            currentGrade = grade;
+            document.getElementById('active-grade-label').innerText = grade;
+            document.getElementById('stat-grade').innerText = grade;
+            
+            if (grade === 'Grade 5') {
+                document.getElementById('g5-btn').className = "px-4 py-1.5 text-xs font-bold rounded-full bg-blue-600 text-white shadow-md transition-all";
+                document.getElementById('g6-btn').className = "px-4 py-1.5 text-xs font-bold rounded-full text-slate-400 hover:text-white transition-all";
+                document.getElementById('dash-title').innerText = "Grade 5 Georgia Mathematics Curriculum";
+                document.getElementById('dash-desc').innerText = "Focusing on fractions with unlike denominators, decimal place value to thousandths, and coordinate geometry.";
+                document.getElementById('stat-target').innerText = "Fractions & Decimals";
+            } else {
+                document.getElementById('g6-btn').className = "px-4 py-1.5 text-xs font-bold rounded-full bg-blue-600 text-white shadow-md transition-all";
+                document.getElementById('g5-btn').className = "px-4 py-1.5 text-xs font-bold rounded-full text-slate-400 hover:text-white transition-all";
+                document.getElementById('dash-title').innerText = "Grade 6 Georgia Mathematics Curriculum";
+                document.getElementById('dash-desc').innerText = "Focusing on fraction division, proportional ratios & unit rates, and algebraic expressions & equations.";
+                document.getElementById('stat-target').innerText = "Ratios & Expressions";
+            }
+            updateDropdowns();
+            renderExplorer();
+        }
+
+        function updateDropdowns() {
+            const topics = gradeCurriculum[currentGrade];
+            document.getElementById('tutor-topic-select').innerHTML = topics.map(t => `<option value="${t.title}">${t.title}</option>`).join('');
+            document.getElementById('quiz-topic-select').innerHTML = topics.map(t => `<option value="${t.title}">${t.title}</option>`).join('');
+        }
+
+        function renderExplorer() {
+            const grid = document.getElementById('topic-grid');
+            const topics = gradeCurriculum[currentGrade];
+            grid.innerHTML = topics.map(t => `
+                <div class="clean-card p-6 rounded-3xl flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-900 mb-4"><i data-lucide="${t.icon}" class="w-6 h-6"></i></div>
+                        <h4 class="font-extrabold text-slate-900 text-lg">${t.title} (${currentGrade})</h4>
+                        <p class="text-xs text-slate-500 mt-1">${t.desc}</p>
+                    </div>
+                    <button onclick="launchTutorForTopic('${t.title}')" class="mt-6 py-2.5 bg-blue-100 text-blue-900 font-bold text-xs rounded-xl hover:bg-blue-900 hover:text-white transition-all">Open AI Lesson</button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function launchTutorForTopic(topic) {
+            document.getElementById('tutor-topic-select').value = topic;
+            switchTab('tutor');
+            fetchAiTutor();
+        }
+
+        async function fetchAiTutor() {
+            const topic = document.getElementById('tutor-topic-select').value;
+            document.getElementById('tutor-heading').innerText = `${currentGrade} — ${topic} Lesson`;
+            const container = document.getElementById('tutor-content');
+            const infographicBox = document.getElementById('infographic-container');
+            container.innerHTML = `<div class="p-12 text-center"><i data-lucide="loader-2" class="w-8 h-8 text-blue-900 mx-auto animate-spin mb-3"></i><p class="text-sm font-bold text-slate-600">Generating lesson & video script...</p></div>`;
+            infographicBox.innerHTML = '';
+            lucide.createIcons();
+
+            try {
+                const infoRes = await fetch('/api/infographic', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic }) });
+                const infoJson = await infoRes.json();
+                infographicBox.innerHTML = infoJson.content;
+
+                const res = await fetch('/api/tutor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic, grade: currentGrade }) });
+                const json = await res.json();
+                const d = json.data;
+
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="p-6 bg-gradient-to-r from-slate-900 to-blue-950 text-white rounded-2xl shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 border border-blue-800">
+                            <div class="flex items-center space-x-4">
+                                <div id="video-icon-status" class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-md">
+                                    <i data-lucide="video" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-extrabold text-sm tracking-wide uppercase text-blue-300">Slide-Style Video Narration</h4>
+                                    <p class="text-xs text-slate-300 mt-0.5">Listen to the AI audio teacher explain this concept.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="playVideoNarration()" id="play-vid-btn" class="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center space-x-2 transition-all">
+                                    <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                                    <span>Play Narration</span>
+                                </button>
+                                <button onclick="stopVideoNarration()" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl transition-all">
+                                    <i data-lucide="square" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-6 bg-blue-50 rounded-2xl border border-blue-200">
+                            <h3 class="font-extrabold text-blue-950 text-base mb-1">Concept Overview (${currentGrade})</h3>
+                            <p class="text-slate-800 text-sm leading-relaxed" id="speech-text">${d.explanation}</p>
+                        </div>
+                        <div class="p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                            <h3 class="font-extrabold text-slate-900 text-sm mb-3">Step-by-Step Breakdown</h3>
+                            <ul class="space-y-2">
+                                ${d.steps.map((s, i) => `<li class="flex items-center text-sm text-slate-800"><span class="w-6 h-6 rounded-full bg-blue-900 text-white font-extrabold flex items-center justify-center text-xs mr-3">${i+1}</span>${s}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="p-6 bg-indigo-50 rounded-2xl border border-indigo-200">
+                            <h4 class="font-extrabold text-indigo-950 text-sm">Real-World Application & Worked Example</h4>
+                            <p class="text-indigo-900 text-sm mt-1">${d.real_world}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML = `<div class="p-6 bg-rose-50 text-rose-700 rounded-2xl">Failed to load lesson content.</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        let currentUtterance = null;
+        function playVideoNarration() {
+            window.speechSynthesis.cancel();
+            const text = document.getElementById('speech-text').innerText;
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            
+            const btn = document.getElementById('play-vid-btn');
+            const iconStatus = document.getElementById('video-icon-status');
+            
+            btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4 animate-pulse"></i><span>Narrating...</span>`;
+            iconStatus.classList.add('animate-bounce');
+            
+            currentUtterance.onend = function() {
+                btn.innerHTML = `<i data-lucide="play" class="w-4 h-4 fill-current"></i><span>Play Narration</span>`;
+                iconStatus.classList.remove('animate-bounce');
+                lucide.createIcons();
+            };
+            
+            window.speechSynthesis.speak(currentUtterance);
+            lucide.createIcons();
+        }
+
+        function stopVideoNarration() {
+            window.speechSynthesis.cancel();
+            const btn = document.getElementById('play-vid-btn');
+            const iconStatus = document.getElementById('video-icon-status');
+            if (btn) {
+                btn.innerHTML = `<i data-lucide="play" class="w-4 h-4 fill-current"></i><span>Play Narration</span>`;
+                iconStatus.classList.remove('animate-bounce');
+                lucide.createIcons();
+            }
+        }
+
+        async function solveMathQuery() {
+            const query = document.getElementById('solver-query').value;
+            const resContainer = document.getElementById('solver-result-container');
+            const output = document.getElementById('solver-output');
+            if (!query.trim()) return;
+            resContainer.classList.remove('hidden');
+            output.innerText = "Solving problem with AI...";
+            const res = await fetch('/api/solver', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }) });
+            const data = await res.json();
+            output.innerText = data.solution;
+        }
+
+        async function startQuizSession() {
+            const topic = document.getElementById('quiz-topic-select').value;
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = `<div class="text-center py-12"><i data-lucide="loader-2" class="w-8 h-8 text-blue-900 mx-auto animate-spin mb-3"></i><p class="text-sm font-bold text-slate-600">Loading ${currentGrade} quiz (10+ questions) for ${topic}...</p></div>`;
+            lucide.createIcons();
+
+            const res = await fetch('/api/quiz_questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic, grade: currentGrade }) });
+            const data = await res.json();
+            quizQuestions = data.questions;
+            currentQuestionIdx = 0;
+            correctCount = 0;
+            document.getElementById('quiz-diff-tag').innerText = `Difficulty: ${data.difficulty.toUpperCase()}`;
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            if (currentQuestionIdx >= quizQuestions.length) {
+                document.getElementById('quiz-container').innerHTML = `
+                    <div class="text-center py-12 space-y-4">
+                        <div class="w-16 h-16 bg-blue-100 text-blue-900 rounded-full flex items-center justify-center mx-auto"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+                        <h3 class="text-2xl font-extrabold text-slate-900">Quiz Completed!</h3>
+                        <p class="text-slate-600 text-sm">You answered ${correctCount} out of ${quizQuestions.length} correctly.</p>
+                        <button onclick="startQuizSession()" class="bg-blue-900 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:bg-blue-800">Try Again</button>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+            const q = quizQuestions[currentQuestionIdx];
+            document.getElementById('quiz-container').innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-500 uppercase">
+                        <span>Question ${currentQuestionIdx + 1} of ${quizQuestions.length} (${currentGrade})</span>
+                        <span>Correct: ${correctCount}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900">${q.question}</h3>
+                    <div class="space-y-3" id="options-list">
+                        ${q.options.map(opt => `<button onclick="submitQuizAnswer(this, '${opt}', '${q.correct}', '${q.explanation.replace(/'/g, "\\'")}')" class="w-full text-left p-4 rounded-2xl border border-slate-300 bg-slate-50 font-semibold text-slate-800 hover:bg-blue-50 hover:border-blue-600 transition-all option-btn">${opt}</button>`).join('')}
+                    </div>
+                    <div id="explanation-box" class="hidden p-4 rounded-2xl bg-blue-50 border border-blue-200 text-sm text-blue-950"></div>
+                    <div id="next-btn-container" class="hidden pt-4 flex justify-end">
+                        <button onclick="nextQuestion()" class="bg-blue-900 text-white font-extrabold px-6 py-3 rounded-xl shadow-lg flex items-center space-x-2 hover:bg-blue-800"><span>Next Question</span><i data-lucide="arrow-right" class="w-4 h-4"></i></button>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        async function submitQuizAnswer(btn, selected, correct, explanation) {
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            const expBox = document.getElementById('explanation-box');
+            expBox.classList.remove('hidden');
+            const isCorrect = (selected === correct);
+            if (isCorrect) {
+                btn.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-950');
+                expBox.innerHTML = `<strong>Correct! 🎉</strong> ${explanation}`;
+                correctCount++;
+            } else {
+                btn.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-800');
+                expBox.innerHTML = `<strong>Incorrect.</strong> Correct answer: <strong>${correct}</strong>. ${explanation}`;
+            }
+            const res = await fetch('/api/submit_answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ is_correct: isCorrect }) });
+            const data = await res.json();
+            document.getElementById('xp-counter').innerText = `${data.xp} XP`;
+            document.getElementById('quiz-diff-tag').innerText = `Difficulty: ${data.difficulty.toUpperCase()}`;
+            document.getElementById('next-btn-container').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function nextQuestion() { currentQuestionIdx++; renderQuizQuestion(); }
+
+        async function loadAchievements() {
+            const res = await fetch('/api/achievements');
+            const achs = await res.json();
+            document.getElementById('achievements-grid').innerHTML = achs.map(a => `
+                <div class="clean-card p-6 rounded-3xl flex items-center space-x-4 ${a.unlocked ? '' : 'opacity-60 grayscale'}">
+                    <div class="w-14 h-14 rounded-2xl ${a.unlocked ? 'bg-blue-100 text-blue-900' : 'bg-slate-100 text-slate-400'} flex items-center justify-center flex-shrink-0"><i data-lucide="${a.icon}" class="w-7 h-7"></i></div>
+                    <div>
+                        <div class="flex items-center space-x-2"><h3 class="font-extrabold text-slate-900">${a.title}</h3>${a.unlocked ? '<span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Unlocked</span>' : '<span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">Locked</span>'}</div>
+                        <p class="text-xs text-slate-500 mt-1">${a.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        updateDropdowns();
+        renderExplorer();
+        lucide.createIcons();
+    </script>
+</body>
+</html>

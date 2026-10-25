@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #635BFF;
+    --secondary: #19B8A5;
+    --accent: #FFB547;
+    --darkbg: #F5F6FC;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--darkbg);
+}
+
+.sidebar-btn.active {
+    background-color: #EEF2FF;
+    color: var(--primary);
+    border-right: 4px solid var(--primary);
+}
+
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px -10px rgba(99, 91, 255, 0.15);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.view-section {
+    animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
